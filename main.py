@@ -2,6 +2,8 @@ from fastapi import FastAPI, Request
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, Update
 import os
+from aiogram.filters import Command
+
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
@@ -61,7 +63,7 @@ def finish_keyboard():
 
 # ---------- СТАРТ ----------
 
-@dp.message(commands=["start"])
+@dp.message(Command("start"))
 async def start(message: Message):
     await message.answer(
         "Здравствуйте! 👋\n\n"
