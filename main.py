@@ -174,9 +174,12 @@ async def restart(callback: CallbackQuery):
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
     data = await request.json()
-    update = Update.model_validate(data)
-    await dp.feed_update(bot, update)
+    update = Update(**data)
+
+    await dp._process_update(bot=bot, update=update)
+
     return {"ok": True}
+
 
 @app.get("/")
 def health():
