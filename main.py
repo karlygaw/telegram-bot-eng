@@ -1,10 +1,14 @@
+from fastapi import FastAPI, Request
 from aiogram import Bot, Dispatcher
-from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
-import asyncio
+from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, Update
 import os
 
-bot = Bot(token=os.getenv("BOT_TOKEN"))
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
+
+app = FastAPI()
 
 # ---------- КНОПКИ ----------
 
@@ -57,7 +61,7 @@ def finish_keyboard():
 
 # ---------- СТАРТ ----------
 
-@dp.message()
+@dp.message(commands=["start"])
 async def start(message: Message):
     await message.answer(
         "Здравствуйте! 👋\n\n"
@@ -165,11 +169,13 @@ async def restart(callback: CallbackQuery):
 
 # ---------- ЗАПУСК ----------
 
-async def main():
-    await dp.start_polling(bot)
+@app.post("/webhook")
+async def telegram_webhook(request: Request):
+    data = await request.json()
+    update = Update.model_validate(data)
+    await dp.feed_update(bot, update)
+    return {"ok": True}
 
-if __name__ == '__main__':
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        pass
+@app.get("/")
+def health():
+    return {"status": "ok"}
